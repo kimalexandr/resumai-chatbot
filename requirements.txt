@@ -1,0 +1,11 @@
+Flask
+openai
+python-docx
+PyPDF2
+requests
+beautifulsoup4
+Flask-Login
+SQLAlchemy
+psycopg2-binary
+python-dotenv
+smtplib

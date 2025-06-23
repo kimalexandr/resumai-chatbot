@@ -1,0 +1,84 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+  <meta charset="UTF-8" />
+  <title>Мои резюме — ResumAI</title>
+  <link rel="stylesheet" href="/static/style.css" />
+</head>
+<body>
+  <div class="chat-container">
+    <h2>Мои резюме</h2>
+
+    <div>
+      <label>С:</label>
+      <input type="date" id="filter-from" />
+
+      <label>По:</label>
+      <input type="date" id="filter-to" />
+
+      <label>Вакансия:</label>
+      <input type="text" id="filter-vacancy" placeholder="Например: python developer" />
+
+      <button onclick="loadResumes()">Применить фильтр</button>
+    </div>
+
+    <hr />
+
+    <div id="resumes"></div>
+  </div>
+
+  <script>
+    async function loadResumes() {
+      const from = document.getElementById("filter-from").value;
+      const to = document.getElementById("filter-to").value;
+      const vacancy = document.getElementById("filter-vacancy").value;
+
+      let url = "/api/resumes?";
+      if (from) url += `&from=${from}`;
+      if (to) url += `&to=${to}`;
+      if (vacancy) url += `&vacancy=${encodeURIComponent(vacancy)}`;
+
+      const res = await fetch(url);
+      const data = await res.json();
+
+      const container = document.getElementById("resumes");
+      container.innerHTML = "";
+
+      if (data.length === 0) {
+        container.innerText = "Нет резюме по вашему запросу.";
+        return;
+      }
+
+      data.forEach(r => {
+        const div = document.createElement("div");
+        div.style.marginBottom = "20px";
+        div.style.border = "1px solid #ddd";
+        div.style.padding = "10px";
+
+        const title = document.createElement("strong");
+        title.innerText = `Резюме от ${new Date(r.created_at).toLocaleDateString()}`;
+        div.appendChild(title);
+
+        if (r.vacancy_link) {
+          const link = document.createElement("p");
+          link.innerHTML = `<small>Адаптировано под: <a href="${r.vacancy_link}" target="_blank">${r.vacancy_link}</a></small>`;
+          div.appendChild(link);
+        }
+
+        const content = document.createElement("pre");
+        content.innerText = r.content;
+        div.appendChild(content);
+
+        const btn = document.createElement("button");
+        btn.innerText = "Скачать как PDF";
+        btn.onclick = () => generatePDF(r.content);
+        div.appendChild(btn);
+
+        container.appendChild(div);
+      });
+    }
+
+    window.onload = () => loadResumes();
+  </script>
+</body>
+</html>
