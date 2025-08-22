@@ -2,7 +2,7 @@ import smtplib
 from email.mime.text import MIMEText
 from flask import current_app
 
-def send_otp(email, code):
+def send_otp_email(email, code):
     msg = MIMEText(f"Ваш код для входа в ResumAI: {code}")
     msg['Subject'] = "Код входа в ResumAI"
     msg['From'] = current_app.config['MAIL_USERNAME']

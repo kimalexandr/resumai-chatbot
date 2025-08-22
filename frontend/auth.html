@@ -1,45 +1,477 @@
 <!DOCTYPE html>
 <html lang="ru">
 <head>
-  <meta charset="UTF-8" />
-  <title>Войдите в ResumAI</title>
-  <link rel="stylesheet" href="/static/style.css" />
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Вход - ResumAI Chatbot</title>
+    <link rel="stylesheet" href="/static/style.css">
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+    <style>
+        .auth-container {
+            min-height: 100vh;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            padding: 2rem;
+        }
+        
+        .auth-card {
+            background: rgba(255, 255, 255, 0.95);
+            backdrop-filter: blur(10px);
+            border-radius: 20px;
+            padding: 3rem;
+            box-shadow: 0 20px 60px rgba(0, 0, 0, 0.1);
+            max-width: 450px;
+            width: 100%;
+            text-align: center;
+        }
+        
+        .auth-logo {
+            margin-bottom: 2rem;
+        }
+        
+        .auth-logo i {
+            font-size: 4rem;
+            color: #667eea;
+            margin-bottom: 1rem;
+        }
+        
+        .auth-logo h1 {
+            color: #333;
+            font-size: 2rem;
+            font-weight: 700;
+            margin-bottom: 0.5rem;
+        }
+        
+        .auth-logo p {
+            color: #666;
+            font-size: 1rem;
+        }
+        
+        .auth-form {
+            display: flex;
+            flex-direction: column;
+            gap: 1.5rem;
+        }
+        
+        .form-group {
+            text-align: left;
+        }
+        
+        .form-group label {
+            display: block;
+            margin-bottom: 0.5rem;
+            color: #333;
+            font-weight: 500;
+            font-size: 0.9rem;
+        }
+        
+        .form-group input {
+            width: 100%;
+            padding: 1rem 1.5rem;
+            border: 2px solid #e1e5e9;
+            border-radius: 12px;
+            font-size: 1rem;
+            transition: all 0.3s ease;
+            background: white;
+        }
+        
+        .form-group input:focus {
+            outline: none;
+            border-color: #667eea;
+            box-shadow: 0 0 0 3px rgba(102, 126, 234, 0.1);
+        }
+        
+        .auth-btn {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            border: none;
+            padding: 1rem 2rem;
+            border-radius: 12px;
+            font-size: 1rem;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            margin-top: 1rem;
+        }
+        
+        .auth-btn:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 8px 25px rgba(102, 126, 234, 0.3);
+        }
+        
+        .auth-btn:disabled {
+            opacity: 0.6;
+            cursor: not-allowed;
+            transform: none;
+        }
+        
+        .otp-info {
+            background: rgba(102, 126, 234, 0.1);
+            border: 1px solid rgba(102, 126, 234, 0.2);
+            border-radius: 12px;
+            padding: 1rem;
+            margin-top: 1rem;
+            text-align: left;
+        }
+        
+        .otp-info h4 {
+            color: #667eea;
+            margin-bottom: 0.5rem;
+            font-size: 0.9rem;
+        }
+        
+        .otp-info p {
+            color: #666;
+            font-size: 0.9rem;
+            margin-bottom: 0.5rem;
+        }
+        
+        .otp-code {
+            background: white;
+            border: 2px solid #667eea;
+            border-radius: 8px;
+            padding: 0.75rem 1rem;
+            font-family: monospace;
+            font-size: 1.2rem;
+            font-weight: 600;
+            color: #667eea;
+            text-align: center;
+            margin: 0.5rem 0;
+        }
+        
+        .auth-steps {
+            display: flex;
+            justify-content: center;
+            gap: 1rem;
+            margin-bottom: 2rem;
+        }
+        
+        .step {
+            width: 40px;
+            height: 40px;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-weight: 600;
+            font-size: 0.9rem;
+            transition: all 0.3s ease;
+        }
+        
+        .step.active {
+            background: #667eea;
+            color: white;
+        }
+        
+        .step.completed {
+            background: #27ae60;
+            color: white;
+        }
+        
+        .step.pending {
+            background: #e1e5e9;
+            color: #666;
+        }
+        
+        .step-line {
+            width: 40px;
+            height: 2px;
+            background: #e1e5e9;
+            margin-top: 20px;
+        }
+        
+        .step-line.active {
+            background: #667eea;
+        }
+        
+        .step-line.completed {
+            background: #27ae60;
+        }
+        
+        .error-message {
+            background: rgba(231, 76, 60, 0.1);
+            border: 1px solid rgba(231, 76, 60, 0.2);
+            border-radius: 8px;
+            padding: 0.75rem 1rem;
+            color: #e74c3c;
+            font-size: 0.9rem;
+            margin-top: 1rem;
+        }
+        
+        .success-message {
+            background: rgba(39, 174, 96, 0.1);
+            border: 1px solid rgba(39, 174, 96, 0.2);
+            border-radius: 8px;
+            padding: 0.75rem 1rem;
+            color: #27ae60;
+            font-size: 0.9rem;
+            margin-top: 1rem;
+        }
+        
+        @media (max-width: 480px) {
+            .auth-card {
+                padding: 2rem 1.5rem;
+            }
+            
+            .auth-logo i {
+                font-size: 3rem;
+            }
+            
+            .auth-logo h1 {
+                font-size: 1.5rem;
+            }
+        }
+    </style>
 </head>
 <body>
-  <div class="chat-container">
-    <h2>Добро пожаловать в ResumAI</h2>
+    <div class="auth-container">
+        <div class="auth-card">
+            <!-- Logo and Title -->
+            <div class="auth-logo">
+                <i class="fas fa-robot"></i>
+                <h1>ResumAI</h1>
+                <p>Умный помощник для создания резюме</p>
+            </div>
 
-    <input type="email" id="email" placeholder="Введите ваш email" required>
-    <button onclick="sendOTP()">Получить код</button>
+            <!-- Steps Indicator -->
+            <div class="auth-steps">
+                <div class="step active" id="step-1">1</div>
+                <div class="step-line" id="line-1"></div>
+                <div class="step pending" id="step-2">2</div>
+            </div>
 
-    <input type="text" id="otp" placeholder="Код из письма" required>
-    <button onclick="verifyOTP()">Войти</button>
+            <!-- Step 1: Email Input -->
+            <div id="step-1-content">
+                <div class="form-group">
+                    <label for="email">Email адрес</label>
+                    <input type="email" id="email" placeholder="Введите ваш email" required>
+                </div>
+                <button onclick="sendOTP()" class="auth-btn" id="send-otp-btn">
+                    <i class="fas fa-paper-plane"></i>
+                    Получить код
+                </button>
+            </div>
 
-    <p><small>Мы отправим вам одноразовый код на почту.</small></p>
-  </div>
+            <!-- Step 2: OTP Input -->
+            <div id="step-2-content" style="display: none;">
+                <div class="form-group">
+                    <label for="otp">Код подтверждения</label>
+                    <input type="text" id="otp" placeholder="Введите 6-значный код" maxlength="6" required>
+                </div>
+                <button onclick="verifyOTP()" class="auth-btn" id="verify-otp-btn">
+                    <i class="fas fa-sign-in-alt"></i>
+                    Войти
+                </button>
+                <button onclick="sendNewOTP()" class="auth-btn" style="background: #6c757d; margin-top: 1rem;">
+                    <i class="fas fa-sync-alt"></i>
+                    Новый код
+                </button>
+            </div>
 
-  <script>
-    function sendOTP() {
-      const email = document.getElementById("email").value;
-      fetch("/login", {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ email })
-      }).then(res => res.json()).then(() => alert("Код отправлен на вашу почту"));
-    }
+            <!-- OTP Information -->
+            <div id="otp-info" class="otp-info" style="display: none;">
+                <h4><i class="fas fa-info-circle"></i> Информация о коде</h4>
+                <p>Ваш код для входа:</p>
+                <div class="otp-code" id="otp-display"></div>
+                <p><strong>Внимание:</strong> Код вечный для тестирования</p>
+            </div>
 
-    function verifyOTP() {
-      const email = document.getElementById("email").value;
-      const code = document.getElementById("otp").value;
+            <!-- Messages -->
+            <div id="error-message" class="error-message" style="display: none;"></div>
+            <div id="success-message" class="success-message" style="display: none;"></div>
+        </div>
+    </div>
 
-      fetch("/verify", {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ email, code })
-      }).then(res => res.json()).then(data => {
-        if (data.success) window.location.href = "/";
-      });
-    }
-  </script>
+    <script>
+        let currentStep = 1;
+        let currentEmail = '';
+
+        function showStep(step) {
+            // Hide all steps
+            document.getElementById('step-1-content').style.display = 'none';
+            document.getElementById('step-2-content').style.display = 'none';
+            
+            // Show current step
+            if (step === 1) {
+                document.getElementById('step-1-content').style.display = 'block';
+            } else {
+                document.getElementById('step-2-content').style.display = 'block';
+            }
+            
+            // Update step indicators
+            updateStepIndicators(step);
+        }
+
+        function updateStepIndicators(step) {
+            if (step === 1) {
+                document.getElementById('step-1').className = 'step active';
+                document.getElementById('step-2').className = 'step pending';
+                document.getElementById('line-1').className = 'step-line';
+            } else {
+                document.getElementById('step-1').className = 'step completed';
+                document.getElementById('step-2').className = 'step active';
+                document.getElementById('line-1').className = 'step-line active';
+            }
+        }
+
+        function showMessage(type, message) {
+            // Hide all messages
+            document.getElementById('error-message').style.display = 'none';
+            document.getElementById('success-message').style.display = 'none';
+            
+            // Show appropriate message
+            if (type === 'error') {
+                const errorDiv = document.getElementById('error-message');
+                errorDiv.textContent = message;
+                errorDiv.style.display = 'block';
+            } else if (type === 'success') {
+                const successDiv = document.getElementById('success-message');
+                successDiv.textContent = message;
+                successDiv.style.display = 'block';
+            }
+        }
+
+        async function sendOTP() {
+            const email = document.getElementById('email').value.trim();
+            const btn = document.getElementById('send-otp-btn');
+            
+            if (!email) {
+                showMessage('error', 'Пожалуйста, введите email');
+                return;
+            }
+
+            btn.disabled = true;
+            btn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Отправка...';
+
+            try {
+                const response = await fetch('/login', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json'
+                    },
+                    body: JSON.stringify({ email })
+                });
+
+                const data = await response.json();
+
+                if (data.success) {
+                    currentEmail = email;
+                    showStep(2);
+                    showMessage('success', data.message);
+                    
+                    // Show OTP info
+                    if (data.otp) {
+                        document.getElementById('otp-display').textContent = data.otp;
+                        document.getElementById('otp-info').style.display = 'block';
+                    }
+                } else {
+                    showMessage('error', data.error || 'Ошибка отправки кода');
+                }
+            } catch (error) {
+                console.error('Error:', error);
+                showMessage('error', 'Ошибка соединения с сервером');
+            } finally {
+                btn.disabled = false;
+                btn.innerHTML = '<i class="fas fa-paper-plane"></i> Получить код';
+            }
+        }
+
+        async function verifyOTP() {
+            const code = document.getElementById('otp').value.trim();
+            const btn = document.getElementById('verify-otp-btn');
+            
+            if (!code) {
+                showMessage('error', 'Пожалуйста, введите код');
+                return;
+            }
+
+            btn.disabled = true;
+            btn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Проверка...';
+
+            try {
+                const response = await fetch('/verify', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json'
+                    },
+                    body: JSON.stringify({ 
+                        email: currentEmail, 
+                        code: code 
+                    })
+                });
+
+                const data = await response.json();
+
+                if (data.success) {
+                    showMessage('success', 'Успешный вход! Перенаправление...');
+                    setTimeout(() => {
+                        window.location.href = '/';
+                    }, 1500);
+                } else {
+                    showMessage('error', data.error || 'Неверный код');
+                }
+            } catch (error) {
+                console.error('Error:', error);
+                showMessage('error', 'Ошибка соединения с сервером');
+            } finally {
+                btn.disabled = false;
+                btn.innerHTML = '<i class="fas fa-sign-in-alt"></i> Войти';
+            }
+        }
+
+        async function sendNewOTP() {
+            const btn = document.querySelector('#step-2-content .auth-btn[onclick="sendNewOTP()"]');
+            
+            btn.disabled = true;
+            btn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Отправка...';
+
+            try {
+                const response = await fetch('/login', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json'
+                    },
+                    body: JSON.stringify({ email: currentEmail })
+                });
+
+                const data = await response.json();
+
+                if (data.success) {
+                    showMessage('success', 'Новый код отправлен!');
+                    
+                    // Update OTP display
+                    if (data.otp) {
+                        document.getElementById('otp-display').textContent = data.otp;
+                    }
+                } else {
+                    showMessage('error', data.error || 'Ошибка отправки нового кода');
+                }
+            } catch (error) {
+                console.error('Error:', error);
+                showMessage('error', 'Ошибка соединения с сервером');
+            } finally {
+                btn.disabled = false;
+                btn.innerHTML = '<i class="fas fa-sync-alt"></i> Новый код';
+            }
+        }
+
+        // Enter key handlers
+        document.getElementById('email').addEventListener('keypress', function(e) {
+            if (e.key === 'Enter') {
+                sendOTP();
+            }
+        });
+
+        document.getElementById('otp').addEventListener('keypress', function(e) {
+            if (e.key === 'Enter') {
+                verifyOTP();
+            }
+        });
+
+        // Initialize
+        showStep(1);
+    </script>
 </body>
 </html>

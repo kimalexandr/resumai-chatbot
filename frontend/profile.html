@@ -1,84 +1,141 @@
 <!DOCTYPE html>
 <html lang="ru">
 <head>
-  <meta charset="UTF-8" />
-  <title>Мои резюме — ResumAI</title>
-  <link rel="stylesheet" href="/static/style.css" />
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Личный кабинет - ResumAI Chatbot</title>
+    <link rel="stylesheet" href="/static/style.css">
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
 </head>
 <body>
-  <div class="chat-container">
-    <h2>Мои резюме</h2>
+    <div class="app-container">
+        <!-- Header -->
+        <header class="header">
+            <div class="header-content">
+                <div class="logo">
+                    <i class="fas fa-robot"></i>
+                    <span>ResumAI</span>
+                </div>
+                <nav class="nav">
+                    <a href="/" class="nav-link">
+                        <i class="fas fa-home"></i>
+                        Главная
+                    </a>
+                    <a href="/profile" class="nav-link active">
+                        <i class="fas fa-user"></i>
+                        Профиль
+                    </a>
+                    <a href="/logout" class="nav-link logout">
+                        <i class="fas fa-sign-out-alt"></i>
+                        Выйти
+                    </a>
+                </nav>
+            </div>
+        </header>
 
-    <div>
-      <label>С:</label>
-      <input type="date" id="filter-from" />
+        <!-- Main Content -->
+        <main class="main-content">
+            <div class="profile-container">
+                <!-- Profile Header -->
+                <div class="profile-header">
+                    <div class="profile-avatar">
+                        <i class="fas fa-user-circle"></i>
+                    </div>
+                    <div class="profile-info">
+                        <h1>Личный кабинет</h1>
+                        <p>Управляйте своими резюме и аналитикой</p>
+                    </div>
+                    <div class="profile-stats">
+                        <div class="stat-item">
+                            <div class="stat-number" id="total-resumes">0</div>
+                            <div class="stat-label">Резюме</div>
+                        </div>
+                        <div class="stat-item">
+                            <div class="stat-number" id="total-analyses">0</div>
+                            <div class="stat-label">Анализов</div>
+                        </div>
+                    </div>
+                </div>
 
-      <label>По:</label>
-      <input type="date" id="filter-to" />
+                <!-- Filters and Search -->
+                <div class="filters-section">
+                    <div class="filters-row">
+                        <div class="filter-group">
+                            <label for="date-from">Дата с:</label>
+                            <input type="date" id="date-from" class="filter-input">
+                        </div>
+                        <div class="filter-group">
+                            <label for="date-to">Дата по:</label>
+                            <input type="date" id="date-to" class="filter-input">
+                        </div>
+                        <div class="filter-group">
+                            <label for="vacancy-filter">Поиск по вакансии:</label>
+                            <input type="text" id="vacancy-filter" placeholder="Введите текст..." class="filter-input">
+                        </div>
+                        <button onclick="applyFilters()" class="btn btn-primary">
+                            <i class="fas fa-search"></i>
+                            Применить фильтры
+                        </button>
+                    </div>
+                </div>
 
-      <label>Вакансия:</label>
-      <input type="text" id="filter-vacancy" placeholder="Например: python developer" />
+                <!-- Resumes List -->
+                <div class="resumes-section">
+                    <div class="section-header">
+                        <h2><i class="fas fa-file-alt"></i> Мои резюме</h2>
+                        <button onclick="refreshResumes()" class="btn btn-secondary">
+                            <i class="fas fa-sync-alt"></i>
+                            Обновить
+                        </button>
+                    </div>
+                    
+                    <div id="resumes-list" class="resumes-list">
+                        <div class="loading-message">
+                            <i class="fas fa-spinner fa-spin"></i>
+                            Загрузка резюме...
+                        </div>
+                    </div>
+                </div>
 
-      <button onclick="loadResumes()">Применить фильтр</button>
+                <!-- Quick Actions -->
+                <div class="quick-actions">
+                    <h3><i class="fas fa-bolt"></i> Быстрые действия</h3>
+                    <div class="actions-grid">
+                        <a href="/" class="action-card">
+                            <div class="action-icon">
+                                <i class="fas fa-plus"></i>
+                            </div>
+                            <h4>Создать резюме</h4>
+                            <p>Начните с нуля или загрузите файл</p>
+                        </a>
+                        <a href="/" class="action-card">
+                            <div class="action-icon">
+                                <i class="fas fa-upload"></i>
+                            </div>
+                            <h4>Загрузить файл</h4>
+                            <p>Анализ существующего резюме</p>
+                        </a>
+                        <a href="/" class="action-card">
+                            <div class="action-icon">
+                                <i class="fas fa-search"></i>
+                            </div>
+                            <h4>Анализ вакансии</h4>
+                            <p>Адаптация под конкретную вакансию</p>
+                        </a>
+                        <a href="/" class="action-card">
+                            <div class="action-icon">
+                                <i class="fas fa-chart-line"></i>
+                            </div>
+                            <h4>Статистика</h4>
+                            <p>Просмотр прогресса и аналитики</p>
+                        </a>
+                    </div>
+                </div>
+            </div>
+        </main>
     </div>
 
-    <hr />
-
-    <div id="resumes"></div>
-  </div>
-
-  <script>
-    async function loadResumes() {
-      const from = document.getElementById("filter-from").value;
-      const to = document.getElementById("filter-to").value;
-      const vacancy = document.getElementById("filter-vacancy").value;
-
-      let url = "/api/resumes?";
-      if (from) url += `&from=${from}`;
-      if (to) url += `&to=${to}`;
-      if (vacancy) url += `&vacancy=${encodeURIComponent(vacancy)}`;
-
-      const res = await fetch(url);
-      const data = await res.json();
-
-      const container = document.getElementById("resumes");
-      container.innerHTML = "";
-
-      if (data.length === 0) {
-        container.innerText = "Нет резюме по вашему запросу.";
-        return;
-      }
-
-      data.forEach(r => {
-        const div = document.createElement("div");
-        div.style.marginBottom = "20px";
-        div.style.border = "1px solid #ddd";
-        div.style.padding = "10px";
-
-        const title = document.createElement("strong");
-        title.innerText = `Резюме от ${new Date(r.created_at).toLocaleDateString()}`;
-        div.appendChild(title);
-
-        if (r.vacancy_link) {
-          const link = document.createElement("p");
-          link.innerHTML = `<small>Адаптировано под: <a href="${r.vacancy_link}" target="_blank">${r.vacancy_link}</a></small>`;
-          div.appendChild(link);
-        }
-
-        const content = document.createElement("pre");
-        content.innerText = r.content;
-        div.appendChild(content);
-
-        const btn = document.createElement("button");
-        btn.innerText = "Скачать как PDF";
-        btn.onclick = () => generatePDF(r.content);
-        div.appendChild(btn);
-
-        container.appendChild(div);
-      });
-    }
-
-    window.onload = () => loadResumes();
-  </script>
+    <script src="/static/profile.js"></script>
 </body>
 </html>

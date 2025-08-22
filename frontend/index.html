@@ -1,24 +1,120 @@
 <!DOCTYPE html>
 <html lang="ru">
 <head>
-  <meta charset="UTF-8" />
-  <title>ResumAI — Ваш карьерный помощник</title>
-  <link rel="stylesheet" href="/static/style.css" />
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>ResumAI Chatbot - Умный помощник для резюме</title>
+    <link rel="stylesheet" href="/static/style.css">
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
 </head>
 <body>
-  <div class="chat-container">
-    <div id="chat-box"></div>
-    <form id="chat-form">
-      <input type="text" id="user-input" placeholder="Введите ответ или ссылку на вакансию..." autocomplete="off" required />
-      <button type="submit">Отправить</button>
-    </form>
-    <input type="file" id="file-upload" accept=".docx,.pdf">
-    <button onclick="generatePDF()">Скачать как PDF</button>
-    <a href="/profile">Мои резюме</a>
-  </div>
+    <div class="app-container">
+        <!-- Header -->
+        <header class="header">
+            <div class="header-content">
+                <div class="logo">
+                    <i class="fas fa-robot"></i>
+                    <span>ResumAI</span>
+                </div>
+                <nav class="nav">
+                    <a href="/" class="nav-link active">
+                        <i class="fas fa-home"></i>
+                        Главная
+                    </a>
+                    <a href="/profile" class="nav-link">
+                        <i class="fas fa-user"></i>
+                        Профиль
+                    </a>
+                    <a href="/logout" class="nav-link logout">
+                        <i class="fas fa-sign-out-alt"></i>
+                        Выйти
+                    </a>
+                </nav>
+            </div>
+        </header>
 
-  <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script> 
-  <script src="/static/chat.js"></script>
-  <script src="/static/pdf.js"></script>
+        <!-- Main Content -->
+        <main class="main-content">
+            <div class="content-wrapper">
+                <!-- Left Sidebar -->
+                <aside class="sidebar">
+                    <div class="sidebar-section">
+                        <h3><i class="fas fa-upload"></i> Загрузка файла</h3>
+                        <div class="upload-area">
+                            <input type="file" id="file-upload" accept=".docx,.pdf,.txt" class="file-input">
+                            <label for="file-upload" class="file-label">
+                                <i class="fas fa-cloud-upload-alt"></i>
+                                <span>Выбрать файл</span>
+                            </label>
+                            <button onclick="uploadFile()" class="btn btn-primary upload-btn">
+                                <i class="fas fa-upload"></i>
+                                Загрузить файл
+                            </button>
+                        </div>
+                    </div>
+
+                    <div class="sidebar-section">
+                        <h3><i class="fas fa-link"></i> Анализ вакансии</h3>
+                        <div class="input-group">
+                            <input type="text" id="vacancy-link" placeholder="Ссылка на вакансию HH.ru" class="input-field">
+                            <button onclick="analyzeVacancy()" class="btn btn-secondary">
+                                <i class="fas fa-search"></i>
+                                Анализировать
+                            </button>
+                        </div>
+                    </div>
+
+                    <div class="sidebar-section">
+                        <h3><i class="fas fa-edit"></i> Анализ текста</h3>
+                        <div class="input-group">
+                            <textarea id="resume-text" placeholder="Введите текст резюме..." class="textarea-field"></textarea>
+                            <button onclick="analyzeText()" class="btn btn-secondary">
+                                <i class="fas fa-analyze"></i>
+                                Анализировать
+                            </button>
+                        </div>
+                    </div>
+                </aside>
+
+                <!-- Chat Area -->
+                <section class="chat-section">
+                    <div class="chat-header">
+                        <h2><i class="fas fa-comments"></i> Чат с AI-помощником</h2>
+                        <p>Задайте вопрос о резюме или карьере</p>
+                    </div>
+                    
+                    <div class="chat-container">
+                        <div id="chat-box" class="chat-box">
+                            <div class="welcome-message">
+                                <div class="welcome-icon">
+                                    <i class="fas fa-robot"></i>
+                                </div>
+                                <h3>Добро пожаловать в ResumAI!</h3>
+                                <p>Я помогу вам создать идеальное резюме. Вы можете:</p>
+                                <ul>
+                                    <li>📄 Загрузить файл резюме для анализа</li>
+                                    <li>🔗 Проанализировать вакансию по ссылке</li>
+                                    <li>💬 Ввести текст резюме для улучшения</li>
+                                    <li>🤖 Задать вопрос о карьере</li>
+                                </ul>
+                            </div>
+                        </div>
+                        
+                        <div class="chat-input-area">
+                            <div class="input-group">
+                                <input type="text" id="user-input" placeholder="Введите сообщение..." class="chat-input">
+                                <button onclick="sendChatMessage()" class="btn btn-primary send-btn">
+                                    <i class="fas fa-paper-plane"></i>
+                                </button>
+                            </div>
+                        </div>
+                    </div>
+                </section>
+            </div>
+        </main>
+    </div>
+
+    <script src="/static/chat.js"></script>
 </body>
 </html>
