@@ -1,5 +1,6 @@
 from flask import Flask, render_template, request, jsonify
 import os
+import openai
 
 app = Flask(__name__, 
             template_folder='frontend',
@@ -7,7 +8,7 @@ app = Flask(__name__,
 
 # Простая конфигурация
 app.config['SECRET_KEY'] = 'your-secret-key-here'
-app.config['DASHSCOPE_API_KEY'] = os.getenv('DASHSCOPE_API_KEY', '')
+app.config['DEEPSEEK_API_KEY'] = os.getenv('DEEPSEEK_API_KEY', '')
 
 @app.route('/')
 def index():
@@ -30,13 +31,42 @@ def chat():
         
         print(f"Получено сообщение: {message} (тип: {message_type})")
         
-        # Простой ответ без AI
-        if message_type == 'vacancy':
-            reply = f"Анализирую вакансию: {message}\n\nЭто тестовый ответ. Для полного анализа нужен DASHSCOPE_API_KEY."
-        elif message_type == 'resume':
-            reply = f"Анализирую резюме: {message[:100]}...\n\nЭто тестовый ответ. Для полного анализа нужен DASHSCOPE_API_KEY."
+        # Проверяем наличие API ключа
+        if not app.config['DEEPSEEK_API_KEY'] or app.config['DEEPSEEK_API_KEY'] == 'your_deepseek_api_key_here':
+            reply = f"Анализирую: {message}\n\nЭто тестовый ответ. Для полного анализа нужен DEEPSEEK_API_KEY в файле .env"
         else:
-            reply = f"Получено сообщение: {message}\n\nЭто тестовый ответ. Для полного анализа нужен DASHSCOPE_API_KEY."
+            # Используем DeepSeek API
+            try:
+                client = openai.OpenAI(
+                    api_key=app.config['DEEPSEEK_API_KEY'],
+                    base_url="https://api.deepseek.com/v1"
+                )
+                
+                if message_type == 'vacancy':
+                    system_prompt = "Ты - эксперт по анализу вакансий. Проанализируй вакансию и дай рекомендации по адаптации резюме."
+                elif message_type == 'resume':
+                    system_prompt = "Ты - эксперт по составлению резюме. Проанализируй резюме и дай рекомендации по улучшению."
+                else:
+                    system_prompt = "Ты - помощник по карьере и резюме. Отвечай на вопросы пользователей."
+                
+                response = client.chat.completions.create(
+                    model="deepseek-chat",
+                    messages=[
+                        {'role': 'system', 'content': system_prompt},
+                        {'role': 'user', 'content': message}
+                    ],
+                    max_tokens=1000,
+                    temperature=0.7
+                )
+                
+                reply = response.choices[0].message.content
+                
+            except Exception as e:
+                error_msg = str(e)
+                if "Insufficient Balance" in error_msg or "402" in error_msg:
+                    reply = f"Анализирую: {message}\n\n⚠️ Недостаточно баланса на DeepSeek аккаунте.\n\nЭто тестовый ответ. Для полного анализа:\n1. Пополните баланс на https://platform.deepseek.com/\n2. Или используйте тестовый режим"
+                else:
+                    reply = f"Ошибка при обращении к DeepSeek API: {error_msg}"
         
         return jsonify({
             'success': True,

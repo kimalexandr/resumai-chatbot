@@ -6,10 +6,9 @@ from datetime import datetime, timedelta
 import os
 import secrets
 import re
-import requests
+import openai
 from .models import db, User, Resume
 from .mailer import send_otp_email
-from dashscope import Generation
 
 app = Flask(__name__, 
             template_folder='../frontend',
@@ -119,80 +118,18 @@ def verify_otp():
         return jsonify({"success": False, "error": str(e)}), 500
 
 def generate_ai_response(prompt, message_type="chat"):
-    """Генерирует ответ с помощью AI (DeepSeek или Qwen)"""
-    try:
-        ai_provider = app.config.get('AI_PROVIDER', 'deepseek')
-        
-        if ai_provider == 'deepseek':
-            return generate_deepseek_response(prompt, message_type)
-        elif ai_provider == 'qwen':
-            return generate_qwen_response(prompt, message_type)
-        else:
-            return "Неизвестный AI провайдер. Поддерживаются: deepseek, qwen"
-            
-    except Exception as e:
-        print(f"Ошибка при генерации ответа: {e}")
-        return f"Произошла ошибка при обработке запроса: {str(e)}"
-
-def generate_deepseek_response(prompt, message_type="chat"):
     """Генерирует ответ с помощью DeepSeek API"""
     try:
         if not app.config.get('DEEPSEEK_API_KEY'):
             print("DEEPSEEK_API_KEY не настроен")
             return "API ключ для DeepSeek не настроен. Пожалуйста, настройте DEEPSEEK_API_KEY в переменных окружения."
         
-        # Формируем промпт в зависимости от типа сообщения
-        if message_type == "vacancy":
-            system_prompt = "Ты - эксперт по анализу вакансий. Проанализируй вакансию и дай рекомендации по адаптации резюме."
-        elif message_type == "resume":
-            system_prompt = "Ты - эксперт по составлению резюме. Проанализируй резюме и дай рекомендации по улучшению."
-        else:
-            system_prompt = "Ты - помощник по карьере и резюме. Отвечай на вопросы пользователей."
-        
-        # Вызываем DeepSeek API
-        headers = {
-            'Authorization': f'Bearer {app.config["DEEPSEEK_API_KEY"]}',
-            'Content-Type': 'application/json'
-        }
-        
-        data = {
-            'model': 'deepseek-chat',
-            'messages': [
-                {'role': 'system', 'content': system_prompt},
-                {'role': 'user', 'content': prompt}
-            ],
-            'max_tokens': 1500,
-            'temperature': 0.7
-        }
-        
-        response = requests.post(
-            'https://api.deepseek.com/v1/chat/completions',
-            headers=headers,
-            json=data,
-            timeout=30
+        # Настраиваем API ключ
+        client = openai.OpenAI(
+            api_key=app.config['DEEPSEEK_API_KEY'],
+            base_url="https://api.deepseek.com/v1"
         )
         
-        if response.status_code == 200:
-            result = response.json()
-            return result['choices'][0]['message']['content']
-        else:
-            print(f"Ошибка DeepSeek API: {response.status_code} - {response.text}")
-            return f"Ошибка при обращении к DeepSeek API: {response.status_code}"
-            
-    except Exception as e:
-        print(f"Ошибка при генерации ответа DeepSeek: {e}")
-        return f"Произошла ошибка при обработке запроса DeepSeek: {str(e)}"
-
-def generate_qwen_response(prompt, message_type="chat"):
-    """Генерирует ответ с помощью Qwen API"""
-    try:
-        if not app.config.get('DASHSCOPE_API_KEY'):
-            print("DASHSCOPE_API_KEY не настроен")
-            return "API ключ для Qwen не настроен. Пожалуйста, настройте DASHSCOPE_API_KEY в переменных окружения."
-        
-        # Настраиваем API ключ
-        os.environ['DASHSCOPE_API_KEY'] = app.config['DASHSCOPE_API_KEY']
-        
         # Формируем промпт в зависимости от типа сообщения
         if message_type == "vacancy":
             system_prompt = "Ты - эксперт по анализу вакансий. Проанализируй вакансию и дай рекомендации по адаптации резюме."
@@ -201,27 +138,26 @@ def generate_qwen_response(prompt, message_type="chat"):
         else:
             system_prompt = "Ты - помощник по карьере и резюме. Отвечай на вопросы пользователей."
         
-        # Вызываем Qwen API
-        response = Generation.call(
-            model='qwen-turbo',
+        # Вызываем DeepSeek API через OpenAI клиент
+        response = client.chat.completions.create(
+            model="deepseek-chat",
             messages=[
                 {'role': 'system', 'content': system_prompt},
                 {'role': 'user', 'content': prompt}
             ],
-            result_format='message',
             max_tokens=1500,
             temperature=0.7
         )
         
-        if response.status_code == 200:
-            return response.output.choices[0].message.content
-        else:
-            print(f"Ошибка Qwen API: {response.message}")
-            return f"Ошибка при обращении к AI: {response.message}"
+        return response.choices[0].message.content
             
     except Exception as e:
-        print(f"Ошибка при генерации ответа Qwen: {e}")
-        return f"Произошла ошибка при обработке запроса Qwen: {str(e)}"
+        error_msg = str(e)
+        if "Insufficient Balance" in error_msg or "402" in error_msg:
+            return f"⚠️ Недостаточно баланса на DeepSeek аккаунте.\n\nДля полного анализа:\n1. Пополните баланс на https://platform.deepseek.com/\n2. Или используйте тестовый режим\n\nТестовый ответ: Анализирую ваш запрос '{prompt[:100]}...'"
+        else:
+            print(f"Ошибка при генерации ответа DeepSeek: {e}")
+            return f"Произошла ошибка при обработке запроса DeepSeek: {str(e)}"
 
 @app.route('/api/chat', methods=['POST'])
 def chat():
