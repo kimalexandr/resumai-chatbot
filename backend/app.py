@@ -120,6 +120,9 @@ def verify_otp():
 def generate_ai_response(prompt, message_type="chat"):
     """Генерирует ответ с помощью DeepSeek API"""
     try:
+        print(f"DEBUG: Проверяем API ключ: {app.config.get('DEEPSEEK_API_KEY')}")
+        print(f"DEBUG: Тип API ключа: {type(app.config.get('DEEPSEEK_API_KEY'))}")
+        
         if not app.config.get('DEEPSEEK_API_KEY'):
             print("DEEPSEEK_API_KEY не настроен")
             return "API ключ для DeepSeek не настроен. Пожалуйста, настройте DEEPSEEK_API_KEY в переменных окружения."
@@ -138,6 +141,8 @@ def generate_ai_response(prompt, message_type="chat"):
         else:
             system_prompt = "Ты - помощник по карьере и резюме. Отвечай на вопросы пользователей."
         
+        print(f"DEBUG: Отправляем запрос к DeepSeek API...")
+        
         # Вызываем DeepSeek API через OpenAI клиент
         response = client.chat.completions.create(
             model="deepseek-chat",
@@ -149,10 +154,12 @@ def generate_ai_response(prompt, message_type="chat"):
             temperature=0.7
         )
         
+        print(f"DEBUG: Получен ответ от DeepSeek API")
         return response.choices[0].message.content
             
     except Exception as e:
         error_msg = str(e)
+        print(f"DEBUG: Ошибка при генерации ответа: {error_msg}")
         if "Insufficient Balance" in error_msg or "402" in error_msg:
             return f"⚠️ Недостаточно баланса на DeepSeek аккаунте.\n\nДля полного анализа:\n1. Пополните баланс на https://platform.deepseek.com/\n2. Или используйте тестовый режим\n\nТестовый ответ: Анализирую ваш запрос '{prompt[:100]}...'"
         else:
