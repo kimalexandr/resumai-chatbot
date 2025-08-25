@@ -93,7 +93,7 @@ def upload():
         print(f"Загружен файл: {file.filename}")
         
         # Простой ответ без AI
-        reply = f"Файл {file.filename} успешно загружен!\n\nЭто тестовый ответ. Для полного анализа нужен DASHSCOPE_API_KEY."
+        reply = f"Файл {file.filename} успешно загружен!\n\nЭто тестовый ответ. Для полного анализа нужен DEEPSEEK_API_KEY."
         
         return jsonify({
             'success': True,
