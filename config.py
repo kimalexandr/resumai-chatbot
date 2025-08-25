@@ -10,8 +10,12 @@ class Config:
     SQLALCHEMY_DATABASE_URI = 'sqlite:///resumai.db'
     SQLALCHEMY_TRACK_MODIFICATIONS = False
     
-    # Qwen API (DashScope)
-    DASHSCOPE_API_KEY = os.getenv('DASHSCOPE_API_KEY', '')
+    # AI API ключи
+    DASHSCOPE_API_KEY = os.getenv('DASHSCOPE_API_KEY', '')  # Qwen API
+    DEEPSEEK_API_KEY = os.getenv('DEEPSEEK_API_KEY', '')    # DeepSeek API
+    
+    # Выбор AI провайдера (qwen или deepseek)
+    AI_PROVIDER = os.getenv('AI_PROVIDER', 'deepseek')  # По умолчанию DeepSeek
     
     # Настройки почты (опционально)
     MAIL_SERVER = os.getenv('MAIL_SERVER', 'smtp.gmail.com')

@@ -1,0 +1,23 @@
+# ИНСТРУКЦИИ ПО НАСТРОЙКЕ API КЛЮЧА QWEN
+# =============================================
+
+# 1. Создайте файл .env в корневой папке проекта со следующим содержимым:
+
+DASHSCOPE_API_KEY=your_api_key_here
+SECRET_KEY=your-secret-key-here
+
+# 2. ИЛИ установите переменные окружения в командной строке:
+
+# Для Windows (cmd):
+set DASHSCOPE_API_KEY=your_api_key_here
+set SECRET_KEY=your-secret-key-here
+
+# Для Windows (PowerShell):
+$env:DASHSCOPE_API_KEY="your_api_key_here"
+$env:SECRET_KEY="your-secret-key-here"
+
+# 3. Получите бесплатный API ключ на https://dashscope.aliyun.com/
+# 4. Замените "your_api_key_here" на ваш реальный ключ
+# 5. Перезапустите приложение
+
+# ПРИМЕЧАНИЕ: Файл .env должен быть в корневой папке проекта (там же, где run.py)

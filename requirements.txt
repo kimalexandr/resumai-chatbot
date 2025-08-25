@@ -3,6 +3,7 @@ Flask-Login==0.6.2
 Flask-SQLAlchemy==3.0.2
 SQLAlchemy==1.4.53
 dashscope==1.14.0
+deepseek==0.1.0
 python-dotenv==1.0.0
 requests==2.31.0
 beautifulsoup4==4.12.2
