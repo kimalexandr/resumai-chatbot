@@ -7,6 +7,8 @@ import os
 import secrets
 import re
 import openai
+import PyPDF2
+import io
 from .models import db, User, Resume
 from .mailer import send_otp_email
 
@@ -229,8 +231,17 @@ def upload():
             # Для docx файлов возвращаем заглушку
             content = f"[Содержимое файла {file.filename} - для полного анализа нужен python-docx]"
         elif file.filename.endswith('.pdf'):
-            # Для pdf файлов возвращаем заглушку
-            content = f"[Содержимое файла {file.filename} - для полного анализа нужен PyPDF2]"
+            try:
+                # Читаем PDF файл
+                pdf_reader = PyPDF2.PdfReader(io.BytesIO(file.read()))
+                content = ""
+                for page_num in range(len(pdf_reader.pages)):
+                    page = pdf_reader.pages[page_num]
+                    content += page.extract_text() + "\n"
+                print(f"PDF успешно прочитан, страниц: {len(pdf_reader.pages)}")
+            except Exception as e:
+                print(f"Ошибка чтения PDF: {e}")
+                content = f"[Ошибка чтения PDF файла {file.filename}: {str(e)}]"
         
         print(f"Содержимое файла: {content[:100]}...")
         
